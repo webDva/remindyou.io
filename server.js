@@ -14,7 +14,7 @@ const bcrypt = require('bcrypt');
 * MongoDB
 */
 
-const databasename = 'remindyou.io_database'
+const databasename = 'remindyouio_database'
 const databaseuri = 'mongodb://localhost:27017/'
 
 /*
@@ -24,7 +24,7 @@ const databaseuri = 'mongodb://localhost:27017/'
 const app = express();
 // Needed for POST requests.
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+//app.use(bodyParser.urlencoded({ extended: true }));
 
 const PORT = process.env.PORT || '3000';
 app.set('port', PORT);
@@ -43,12 +43,12 @@ app.post('/createAccount', (req, res) => {
             .then(result => {
                 if (err) throw err;
 
+                // if an entry already exists, send an error to the client
                 if (result) {
                     db.close();
                     return res.send({ error: true });
                 } else {
                     dbo.collection('accounts').insertOne({
-                        username: req.body.username,
                         account_id: uuidv4(),
                         email: req.body.email,
                         password: bcrypt.hashSync(req.body.password, 12),
@@ -56,7 +56,7 @@ app.post('/createAccount', (req, res) => {
                     }, (err, res) => { if (err) throw err; });
 
                     db.close();
-                    return res.end();
+                    return res.send({ success: true });
                 }
             }, error => {
                 return res.send({ error: true });
